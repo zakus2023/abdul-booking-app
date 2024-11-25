@@ -1,22 +1,27 @@
 // emailService.js
 
-import postmark from 'postmark'
-const client = new postmark.ServerClient('');
+import postmark from 'postmark';
+import dotenv from 'dotenv';
 
-const sendEmail = (to, subject, text, html) => {
-  client.sendEmail({
-    "From": "info@thehhdcenter.org",
-    "To": to,
-    "Subject": subject,
-    "TextBody": text,
-    "HtmlBody": html,
-  }, (error, success) => {
-    if (error) {
-      console.error("Unable to send email: " + error.message);
-      return;
-    }
-    console.log("Email sent: " + success.Message);
-  });
+// Load environment variables
+dotenv.config();
+
+const client = new postmark.ServerClient(process.env.POSTMARK_TOKEN);
+
+const sendEmail = async (to, subject, text, html) => {
+  try {
+    const response = await client.sendEmail({
+      From: "info@thehhdcenter.org",
+      To: to,
+      Subject: subject,
+      TextBody: text,
+      HtmlBody: html,
+    });
+    console.log("Email sent: ", response.Message);
+  } catch (error) {
+    console.error("Unable to send email: ", error.message);
+  }
 };
 
-export default sendEmail
+export default sendEmail;
+
