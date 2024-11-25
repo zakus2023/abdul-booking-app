@@ -1,7 +1,7 @@
 // emailService.js
 
 import postmark from 'postmark'
-const client = new postmark.ServerClient('68b057ac-6298-4f17-9895-834d1b56fbc1');
+const client = new postmark.ServerClient('');
 
 const sendEmail = (to, subject, text, html) => {
   client.sendEmail({
