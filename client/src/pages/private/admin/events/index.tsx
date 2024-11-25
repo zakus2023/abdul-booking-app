@@ -2,12 +2,10 @@ import { useEffect, useState } from "react";
 import PageTitle from "../../../../components/page-title";
 import { Button, Table, message } from "antd";
 import { useNavigate } from "react-router-dom";
-import {
-  deleteEvent,
-  getEvents,
-} from "../../../../api-services/event-services";
+import { deleteEvent, getEvents } from "../../../../api-services/event-services";
 import { Pen, Trash2 } from "lucide-react";
 import { getDateTimeFormat } from "../../../../helpers/date-time-format";
+import type { ColumnsType } from "antd/es/table";
 
 function Events() {
   const navigate = useNavigate();
@@ -18,10 +16,7 @@ function Events() {
   const getData = async () => {
     try {
       setLoading(true);
-      const response = await getEvents({
-        searchText:'',
-        date: ''
-      });
+      const response = await getEvents({ searchText: "", date: "" });
       setEvents(response.data);
     } catch (error) {
       message.error("Failed to fetch events");
@@ -34,7 +29,20 @@ function Events() {
     getData();
   }, []);
 
-  const columns = [
+  const deleteEventHandler = async (id: string) => {
+    try {
+      setLoading(true);
+      await deleteEvent(id);
+      getData();
+      message.success("Event deleted successfully");
+    } catch (error) {
+      message.error("Failed to delete event");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const columns: ColumnsType<any> = [
     {
       title: "Event Name",
       dataIndex: "name",
@@ -43,9 +51,7 @@ function Events() {
     {
       title: "Date and Time",
       dataIndex: "date",
-      render: (date: any, row: any) => {
-        return getDateTimeFormat(`${date} ${row.time}`);
-      },
+      render: (_: any, row: any) => getDateTimeFormat(`${row.date} ${row.time}`),
       key: "date",
     },
     {
@@ -57,10 +63,10 @@ function Events() {
       title: "Date Created",
       dataIndex: "createdAt",
       render: (date: any) => getDateTimeFormat(date),
+      key: "createdAt",
     },
     {
       title: "Actions",
-      dataIndex: "acttions",
       render: (record: any) => (
         <div className="flex gap-5">
           <Trash2
@@ -78,19 +84,6 @@ function Events() {
     },
   ];
 
-  const deleteEventHandler = async (id: string) => {
-    try {
-      setLoading(loading);
-      await deleteEvent(id);
-      getData();
-      message.success("Event deleted successfully");
-    } catch (error) {
-      message.error("Failed to delete event");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div>
       <div className="flex justify-between items-center">
@@ -99,7 +92,7 @@ function Events() {
           Create Events
         </Button>
       </div>
-      <Table dataSource={events} columns={columns} loading={loading} />
+      <Table dataSource={events} columns={columns} loading={loading} rowKey="_id" />
     </div>
   );
 }
